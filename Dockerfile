@@ -18,17 +18,14 @@ RUN mvn -s /app/settings.xml -f /app/pom.xml clean package
 # 选择运行时基础镜像
 FROM amazoncorretto:21.0.6
 
-# 安装依赖包，如需其他依赖包，请到alpine依赖包管理(https://pkgs.alpinelinux.org/packages?name=php8*imagick*&branch=v3.13)查找。
-# 选用国内镜像源以提高下载速度
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories \
-    && apk add --update --no-cache ca-certificates \
-    && rm -f /var/cache/apk/*
+# Amazon Corretto 是基于 Amazon Linux，使用 yum 而不是 apk
+# 安装 ca-certificates
+RUN yum update -y && \
+    yum install -y ca-certificates && \
+    yum clean all
 
 # 容器默认时区为UTC，如需使用上海时间请启用以下时区设置命令
-# RUN apk add tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone
-
-# 使用 HTTPS 协议访问容器云调用证书安装
-RUN apk add ca-certificates
+# RUN yum install -y tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone
 
 # 指定运行时的工作目录
 WORKDIR /app
